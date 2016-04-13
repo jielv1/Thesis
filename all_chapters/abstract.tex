@@ -1,0 +1,17 @@
+
+This thesis proposes a novel GPU implementation for merging two sorted arrays. 
+
+We consider the problem of merging two arrays $A$ and $B$ into a single array $C$. 
+Each element in the arrays has a key. An ordering relation denoted by $\leq$ 
+is defined on the keys. Array $A$ and $B$ has $m$ and $n$ elements, respectively, 
+where $m$ and $n$ do not have be to equal.  
+Both array $A$ and array $B$ are sorted based on the ordering relation. 
+The task is to produce the output array $C$ of size $m+n$.  
+Array $C$ consists of all the input elements from array $A$ and $B$, and is 
+sorted by the ordering relation. 
+
+We applied several GPU-specific optimizations to the parallel merge algorithm. 
+The optimizations include coordinating the memory access pattern, 
+making full use of the shared memory and reducing the thread divergence.
+Our implementation achieves more than 10x speedup compared to sequential merge, and
+at most 20x speedup compared to thrust merge implementation.

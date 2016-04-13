@@ -1,0 +1,10 @@
+\chapter{Conclusion}\label{chap:conclusion}
+In this thesis, we implemented three versions of parallel merge algorithm on GPU: 
+naive parallel merge, single buffer parallel merge and double buffer parallel merge.
+
+We evaluated their performance on different GPUs. Among the three versions, single 
+buffer parallel merge had the best performance. Compared to sequential merge,
+single buffer parallel merge achieved 10x speedup. Compared to thrust merge 
+implementation, single buffer parallel merge achieved at most 20x speedup 
+for certain GPU architecture.
+

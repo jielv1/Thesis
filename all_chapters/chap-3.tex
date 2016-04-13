@@ -1,0 +1,61 @@
+\chapter{GPU Architecture and Global Memory Coalescing}\label{chap:architecture}
+
+    \section{GPU Architecture}\label{sect:GPUArchitecure}
+    \begin{itemize}
+    \item   \textbf{Computation:} GPUs are designed for high computation throughput instead of 
+            low latency. GPUs typically contain hundreds of cores. Programmers are allowed to
+            set the number of blocks and the number of threads for each block to create massive
+            parallelism that utilizes the huge number of cores on a GPU.
+    \item   \textbf{Memory hierarchy:} The GPU memory hierarchy consists of global memory, shared memory 
+            and registers. Global memory is shared across thread blocks. It is the largest 
+            in terms of size. However, it is the slowest. Shared memory is shared only among 
+            the threads in a single block. It is faster than global memory but slower than registers. 
+            The size of shared memory is limited. In all the GPUs we use, the shared memory size per
+            block is 48 KB. Registers are the fastest but have the smallest size.
+    \end{itemize}
+
+    \section{Baseline Architecture}\label{sect:baseline}
+    The CPU and GPUs and their specifications are listed as follows:
+\begin{itemize}
+    \item CPU: Intel Core i7-4960HQ Processor, 2.6 GHz
+    \item GPU: Nvidia Titan-Z, Kepler Architecture
+    \item GPU: Nvidia GTX980, Maxwell Architecture
+ \end{itemize} 
+    
+
+    \section{Global Memory Coalescing}\label{sect:coalesce}
+    When we launch a kernel on GPU, it is executed by the parallel threads. 
+    If the kernel has a global memory reference, then each thread will also generate a
+    global memory request, and the memory addresses for each thread will most likely be 
+    different. Listing \ref{list:coalesce} shows an example of global memory reference.
+
+    \begin{minipage}{\linewidth}
+    \begin{singlespace}
+    \begin{lstlisting} [caption = {Memory Access Pattern}, captionpos=b, label = {list:coalesce}]
+__global__ void kernel(int* a) 
+{
+    int tid = threadIdx.x;
+    a[tid] = tid;
+}
+    \end{lstlisting}
+    \end{singlespace}
+    \end{minipage}
+
+    These memory requests are grouped into a number of memory transactions. 
+    When consecutive threads access consecutive global memory addresses 
+    (as in Listing \ref{list:coalesce}), we call this coalesced access. 
+    When coalesced access happens, a single transaction may be implemented \cite{cgo_arch} 
+    to maximize the bandwidth usage.
+
+    When the memory addresses accessed by threads are not consecutive 
+    (e.g., for an access $a[tid * N]$ instead of $a[tid]$ in Listing \ref{list:coalesce}), 
+    we call this non-coalesced access. 
+    It is not possible anymore to pack the different requests from different threads 
+    into a single transaction. In the worst case, we may need to make one transaction 
+    per thread. This will result in a poor usage of memory bandwidth. 
+    
+    It is desirable to make all the accesses to global memory coalesced. One approach is to 
+    use the shared memory as the scratch pad. This approach requires complex code 
+    restructuring and is one of the GPU-specific optimizations that we use to improve the 
+    performance of parallel merge. 
+
